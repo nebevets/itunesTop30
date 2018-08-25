@@ -1,0 +1,54 @@
+body{
+    margin: auto;
+    width: 1152px;
+}
+.song{
+    position: relative;
+    float: left;
+    display: inline-block;
+    background: #b9b0cf;
+    border-radius: 15px;
+    border: 2px solid #453a5f;
+    width: 370px;
+    font-family: Verdana;
+    margin: 5px;
+}
+.coverArt{
+    float: left;
+    padding: 10px;
+}
+.artist{
+    color: #453a5f;
+    padding-top: 10px;
+    font-size: medium;
+}
+.songTitle{
+    color: #f1eff5;
+    font-size: small;
+}
+.number{
+    background: whitesmoke;
+    color: #453a5f;
+    padding: 10px;
+    border-radius: 50%;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+.audioClip{
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    transform: translateY(-10px);
+}
+@media screen and (max-width: 1152px){
+    body{
+        width: 768px;
+    }
+}
+@media screen and (max-width: 768px){
+    body{
+        width: 384px;
+    }
+}

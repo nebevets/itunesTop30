@@ -42,6 +42,27 @@ body{
     left: 10px;
     transform: translateY(-10px);
 }
+.error{
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-block;
+    background: #c92334;
+    border-radius: 5px;
+    border: 2px solid #76131d;
+    width: 370px;
+    font-family: Verdana;
+    padding: 5px;
+    color: whitesmoke;
+}
+.error > h3 {
+    margin: 5px 0;
+    background-color: lightgray;
+    padding: 10px;
+    border-radius: 5px;
+    color: #76131d;
+}
 @media screen and (max-width: 1152px){
     body{
         width: 768px;

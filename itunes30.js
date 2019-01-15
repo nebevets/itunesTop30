@@ -15,9 +15,15 @@ function initiateApp(){
       url: 'http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=30/json',
       dataType: 'json', 
       success: function(response) {
-          var data = response;
-          var arrDataEntries = data.feed.entry; // this is pretty brute force, but the only alternative i can think of might be worse. 
-          makeSongTiles(arrDataEntries);
+          makeSongTiles(response.feed.entry);
+      },
+      error: function(){
+          var error = $('<div>').addClass('error');
+          var errorTitle = $('<h3>').text('Error');
+          var errorText = $('<p>').text('Sorry, there was an error retrieving data from iTunes');
+
+          error.append(errorTitle, errorText);
+          $('body').append(error);
       }
     }
     $.ajax(ajaxOptions);
@@ -30,9 +36,9 @@ function showClip(e){
 
 function hideClip(e){
     e.preventDefault();
-    var thisClip = $(this).children('.audioClip'); // i tried .first, but it broke other lines below, like .hide()
+    var thisClip = $(this).children('.audioClip');
     if(!thisClip.prop('paused')){
-        thisClip[0].pause(); // this seems wonky, what am i doing wrong here??
+        thisClip[0].pause();
     }
     thisClip.hide();
 }
@@ -43,7 +49,7 @@ function makeSongTiles(arrayData){
         songDiv.hover(showClip, hideClip);
 
         var songImgProps = {
-            src: arrayData[i]['im:image'][2].label, // yuck
+            src: arrayData[i]['im:image'][2].label,
             'class': 'coverArt',
             height: 170 + 'px'
         };
@@ -71,7 +77,7 @@ function makeSongTiles(arrayData){
         }
         var audioClip = $('<audio>', audioClipProps);
         var sourceTagProps = {
-            src: arrayData[i].link[1].attributes.href, // hmmm
+            src: arrayData[i].link[1].attributes.href,
             type: arrayData[i].link[1].attributes.type
         }
         var sourceTag = $('<source>', sourceTagProps);

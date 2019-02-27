@@ -31,7 +31,7 @@ function initiateApp(){
 
 function showClip(e){
     e.preventDefault();
-    $(this).children('.audioClip').show(); // ugly
+    $(this).children('.audioClip').show();
 }
 
 function hideClip(e){

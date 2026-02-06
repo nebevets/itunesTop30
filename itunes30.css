@@ -1,20 +1,20 @@
 body {
+  display: flex;
+  flex-wrap: wrap;
   margin: auto;
   width: 1152px;
 }
 .song {
-  position: relative;
-  float: left;
-  display: inline-block;
   background: #b9b0cf;
   border-radius: 15px;
   border: 2px solid #453a5f;
+  display: flex;
   width: 370px;
   font-family: Verdana;
   margin: 5px;
+  position: relative;
 }
 .coverArt {
-  float: left;
   padding: 10px;
 }
 .artist {

@@ -8,91 +8,106 @@ advanced:
 on hover, show the description of the song or some other additional piece of info.  make it show up above the existing info in the box.
 */
 
-$("document").ready(initiateApp);
+document.addEventListener("DOMContentLoaded", initiateApp);
+
+const CLIP_STATE = {
+  SHOW: "show",
+  HIDE: "hide",
+};
+
+let globalAudioClip = null;
 
 function initiateApp() {
-  var ajaxOptions = {
-    url: "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=30/json",
-    dataType: "json",
-    success: function (response) {
-      makeSongTiles(response.feed.entry);
-    },
-    error: function () {
-      var error = $("<div>").addClass("error");
-      var errorTitle = $("<h3>").text("Error");
-      var errorText = $("<p>").text(
-        "Sorry, there was an error retrieving data from iTunes",
-      );
+  globalAudioClip = document.createElement("audio");
+  globalAudioClip.classList.add("audioClip");
+  globalAudioClip.controls = true;
+  document.body.appendChild(globalAudioClip);
 
-      error.append(errorTitle, errorText);
-      $("body").append(error);
-    },
+  fetch(
+    "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=30/json",
+  )
+    .then((response) => response.json())
+    .then((data) => makeSongTiles(data.feed.entry))
+    .catch((error) => {
+      const errorDiv = document.createElement("div");
+      errorDiv.classList.add("error");
+
+      const errorTitle = document.createElement("h3");
+      errorTitle.textContent = "Error";
+
+      const errorText = document.createElement("p");
+      errorText.textContent =
+        "Sorry, there was an error retrieving data from iTunes";
+
+      errorDiv.appendChild(errorTitle);
+      errorDiv.appendChild(errorText);
+      document.body.appendChild(errorDiv);
+    });
+}
+
+function toggleClip(state) {
+  return function (e) {
+    e.preventDefault();
+    switch (state) {
+      case CLIP_STATE.SHOW:
+        globalAudioClip.innerHTML = "";
+        const sourceTag = document.createElement("source");
+        sourceTag.src = this.dataset.audioSrc;
+        sourceTag.type = this.dataset.audioType;
+        globalAudioClip.appendChild(sourceTag);
+        globalAudioClip.load();
+        globalAudioClip.currentTime = 0;
+        this.appendChild(globalAudioClip);
+        globalAudioClip.style.display = "block";
+        break;
+      case CLIP_STATE.HIDE:
+        if (!globalAudioClip.paused) {
+          globalAudioClip.pause();
+        }
+        globalAudioClip.currentTime = 0;
+        globalAudioClip.style.display = "none";
+        break;
+      default:
+        break;
+    }
   };
-  $.ajax(ajaxOptions);
-}
-
-function showClip(e) {
-  e.preventDefault();
-  $(this).children(".audioClip").show();
-}
-
-function hideClip(e) {
-  e.preventDefault();
-  var thisClip = $(this).children(".audioClip");
-  if (!thisClip.prop("paused")) {
-    thisClip[0].pause();
-  }
-  thisClip.hide();
 }
 
 function makeSongTiles(arrayData) {
-  for (var i = 0; i < arrayData.length; i++) {
-    var songDiv = $("<div>").addClass("song");
-    songDiv.hover(showClip, hideClip);
+  for (let i = 0; i < arrayData.length; i++) {
+    const songDiv = document.createElement("div");
+    songDiv.classList.add("song");
+    songDiv.addEventListener("mouseenter", toggleClip(CLIP_STATE.SHOW));
+    songDiv.addEventListener("mouseleave", toggleClip(CLIP_STATE.HIDE));
 
-    var songImgProps = {
-      src: arrayData[i]["im:image"][2].label,
-      class: "coverArt",
-      height: 170 + "px",
-    };
-    var songImg = $("<img>", songImgProps);
-    songDiv.append(songImg);
+    const songImg = document.createElement("img");
+    songImg.src = arrayData[i]["im:image"][2].label;
+    songImg.classList.add("coverArt");
+    songImg.height = 170;
+    songDiv.appendChild(songImg);
 
-    var artistDivProps = {
-      class: "artist",
-      text: arrayData[i]["im:artist"].label,
-    };
-    var artistDiv = $("<div>", artistDivProps);
-    songDiv.append(artistDiv);
+    const artistDiv = document.createElement("div");
+    artistDiv.classList.add("artist");
+    artistDiv.textContent = arrayData[i]["im:artist"].label;
 
-    var titleDivProps = {
-      class: "songTitle",
-      text: arrayData[i]["im:name"].label,
-    };
-    var titleDiv = $("<div>", titleDivProps);
-    songDiv.append(titleDiv);
+    const titleDiv = document.createElement("div");
+    titleDiv.classList.add("songTitle");
+    titleDiv.textContent = arrayData[i]["im:name"].label;
 
-    var audioClipProps = {
-      controls: "",
-      text: "sorry, your browser sucks.",
-      class: "audioClip",
-    };
-    var audioClip = $("<audio>", audioClipProps);
-    var sourceTagProps = {
-      src: arrayData[i].link[1].attributes.href,
-      type: arrayData[i].link[1].attributes.type,
-    };
-    var sourceTag = $("<source>", sourceTagProps);
-    audioClip.append(sourceTag);
-    songDiv.append(audioClip);
+    const artistTitleWrapper = document.createElement("div");
+    artistTitleWrapper.classList.add("artistTitleWrapper");
+    artistTitleWrapper.appendChild(artistDiv);
+    artistTitleWrapper.appendChild(titleDiv);
+    songDiv.appendChild(artistTitleWrapper);
 
-    var songNumProps = {
-      class: "number",
-      text: i + 1,
-    };
-    var songNum = $("<div>", songNumProps);
-    songDiv.append(songNum);
+    songDiv.dataset.audioSrc = arrayData[i].link[1].attributes.href;
+    songDiv.dataset.audioType = arrayData[i].link[1].attributes.type;
 
-    $("body").append(songDiv);
+    const songNum = document.createElement("div");
+    songNum.classList.add("number");
+    songNum.textContent = i + 1;
+    songDiv.appendChild(songNum);
+
+    document.body.appendChild(songDiv);
   }
 }

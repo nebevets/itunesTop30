@@ -10,7 +10,19 @@ on hover, show the description of the song or some other additional piece of inf
 
 document.addEventListener("DOMContentLoaded", initiateApp);
 
+const CLIP_STATE = {
+  SHOW: "show",
+  HIDE: "hide",
+};
+
+let globalAudioClip = null;
+
 function initiateApp() {
+  globalAudioClip = document.createElement("audio");
+  globalAudioClip.classList.add("audioClip");
+  globalAudioClip.controls = true;
+  document.body.appendChild(globalAudioClip);
+
   fetch(
     "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=30/json",
   )
@@ -33,27 +45,40 @@ function initiateApp() {
     });
 }
 
-function showClip(e) {
-  e.preventDefault();
-  const audioClip = this.querySelector(".audioClip");
-  audioClip.style.display = "block";
-}
-
-function hideClip(e) {
-  e.preventDefault();
-  const audioClip = this.querySelector(".audioClip");
-  if (!audioClip.paused) {
-    audioClip.pause();
-  }
-  audioClip.style.display = "none";
+function toggleClip(state) {
+  return function (e) {
+    e.preventDefault();
+    switch (state) {
+      case CLIP_STATE.SHOW:
+        globalAudioClip.innerHTML = "";
+        const sourceTag = document.createElement("source");
+        sourceTag.src = this.dataset.audioSrc;
+        sourceTag.type = this.dataset.audioType;
+        globalAudioClip.appendChild(sourceTag);
+        globalAudioClip.load();
+        globalAudioClip.currentTime = 0;
+        this.appendChild(globalAudioClip);
+        globalAudioClip.style.display = "block";
+        break;
+      case CLIP_STATE.HIDE:
+        if (!globalAudioClip.paused) {
+          globalAudioClip.pause();
+        }
+        globalAudioClip.currentTime = 0;
+        globalAudioClip.style.display = "none";
+        break;
+      default:
+        break;
+    }
+  };
 }
 
 function makeSongTiles(arrayData) {
   for (let i = 0; i < arrayData.length; i++) {
     const songDiv = document.createElement("div");
     songDiv.classList.add("song");
-    songDiv.addEventListener("mouseenter", showClip);
-    songDiv.addEventListener("mouseleave", hideClip);
+    songDiv.addEventListener("mouseenter", toggleClip(CLIP_STATE.SHOW));
+    songDiv.addEventListener("mouseleave", toggleClip(CLIP_STATE.HIDE));
 
     const songImg = document.createElement("img");
     songImg.src = arrayData[i]["im:image"][2].label;
@@ -75,15 +100,8 @@ function makeSongTiles(arrayData) {
     artistTitleWrapper.appendChild(titleDiv);
     songDiv.appendChild(artistTitleWrapper);
 
-    const audioClip = document.createElement("audio");
-    audioClip.classList.add("audioClip");
-    audioClip.controls = true;
-
-    const sourceTag = document.createElement("source");
-    sourceTag.src = arrayData[i].link[1].attributes.href;
-    sourceTag.type = arrayData[i].link[1].attributes.type;
-    audioClip.appendChild(sourceTag);
-    songDiv.appendChild(audioClip);
+    songDiv.dataset.audioSrc = arrayData[i].link[1].attributes.href;
+    songDiv.dataset.audioType = arrayData[i].link[1].attributes.type;
 
     const songNum = document.createElement("div");
     songNum.classList.add("number");

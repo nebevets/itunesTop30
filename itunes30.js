@@ -70,7 +70,9 @@ function makeSongTiles(arrayData) {
       text: arrayData[i]["im:name"].label,
     };
     var titleDiv = $("<div>", titleDivProps);
-    songDiv.append(titleDiv);
+    var artistTitleWrapper = $("<div>").addClass("artistTitleWrapper");
+    artistTitleWrapper.append(artistDiv, titleDiv);
+    songDiv.append(artistTitleWrapper);
 
     var audioClipProps = {
       controls: "",
